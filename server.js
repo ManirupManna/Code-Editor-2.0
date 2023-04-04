@@ -1,3 +1,4 @@
+//This is the main file now
 require("dotenv").config();
 const express = require("express");
 const port = process.env.DEV_PORT || 3000;
@@ -77,56 +78,106 @@ app.get("/cpp", (req, res) => {
 //   console.log(req.body);
 //   res.send(req.body);
 // });
+
 app.post("/run", (req, res) => {
   console.log(req.body);
   const { lang, code, input } = req.body;
   console.log(lang, code, input);
   // res.send(lang, code, input);
-  fs.writeFile(programFilePath + "input.txt", input, (err) => {
+  const id = `${Date.now()}`;
+  const programfile = `Main_${id}`;
+  const inputfile = `input${id}.txt`;
+  const outputfile = `output${id}.txt`;
+  const programStructure = {
+    lang,
+    programfile,
+    inputfile,
+    outputfile,
+  };
+  console.log("program structure", programStructure);
+  fs.writeFile(programFilePath + inputfile, input, (err) => {
     if (err) {
-      res.send("ERR: couldn't write in input file");
-    } else {
+      res.json({
+        output: "",
+        err: "",
+        executionStatus: false,
+        serverError: "ERR: couldn't write in input file",
+      });
+      return;
+    }
+    fs.writeFile(programFilePath + outputfile, "", (err) => {
+      if (err) {
+        res.json({
+          output: "",
+          err: "",
+          executionStatus: false,
+          serverError: "ERR: couldn't write in output file",
+        });
+
+        return;
+      }
+
       switch (lang) {
         case "python": {
-          fs.writeFile(programFilePath + "Python.py", code, (err) => {
-            if (err) res.send("ERR: couldn't write in python file");
-            else {
-              // res.send("Written in python file");
-              //Execute python code
-              runCode(lang, res);
+          fs.writeFile(programFilePath + `${programfile}.py`, code, (err) => {
+            if (err) {
+              res.json({
+                output: "",
+                err: "",
+                executionStatus: false,
+                serverError: "ERR: couldn't write in python file",
+              });
+              return;
             }
+            // res.send("Written in python file");
+            //Execute python code
+            programStructure.langCode = "py";
+            runCode(programStructure, res);
           });
           break;
         }
         case "java": {
-          fs.writeFile(programFilePath + "Java.java", code, (err) => {
-            if (err) res.send("ERR: couldn't write in java file");
-            else {
+          fs.writeFile(
+            programFilePath + `${programfile}.java`,
+            code.replace("Java", programfile),
+            (err) => {
+              if (err) {
+                res.json({
+                  output: "",
+                  err: "",
+                  executionStatus: false,
+                  serverError: "ERR: couldn't write in Java file",
+                });
+                return;
+              }
               //Execute java code
               // res.send("Written in java file");
-              runCode(lang, res);
+              programStructure.langCode = "java";
+              runCode(programStructure, res);
             }
-          });
+          );
           break;
         }
         case "cpp": {
-          fs.writeFile(programFilePath + "Cpp.cpp", code, (err) => {
+          fs.writeFile(programFilePath + `${programfile}.cpp`, code, (err) => {
             if (err) res.send("ERR: couldn't write in CPP file");
             else {
               //Execute CPP code
               // res.send("Written in cpp file");
-              runCode(lang, res);
+              programStructure.langCode = "cpp";
+              runCode(programStructure, res);
             }
           });
           break;
         }
         case "c": {
-          fs.writeFile(programFilePath + "C.c", code, (err) => {
+          fs.writeFile(programFilePath + `${programfile}.c`, code, (err) => {
             if (err) res.send("ERR: couldn't write in C file");
             else {
               //Execute C code
               // res.send("Written in c file");
-              runCode(lang, res);
+              programStructure.langCode = "c";
+              runCode(programStructure, res);
             }
           });
           break;
@@ -135,24 +186,43 @@ app.post("/run", (req, res) => {
           res.send("Programming language not found");
         }
       }
-    }
+    });
   });
 });
 
-const runCode = (lang, res) => {
-  fs.writeFile(programFilePath + "output.txt", "", (err) => {
-    if (err) res.send("ERR: can't modify output.txt");
-    else {
-      exec(`sh shell.sh ${lang}`, (err, stdout, stderr) => {
-        if (err) {
-          console.log(err);
-          res.send("ERR: can't execute program");
-        } else {
-          res.sendFile(__dirname + "/output.txt");
-        }
-      });
+const runCode = (programStructure, res) => {
+  const { lang, programfile, inputfile, outputfile, langCode } =
+    programStructure;
+  exec(
+    `sh shell.sh ${lang} ${programfile} ${inputfile} ${outputfile}`,
+    (err, stdout, stderr) => {
+      if (err) {
+        console.log(err);
+        res.send("ERR: can't execute program");
+      } else {
+        fs.readFile(__dirname + `/${outputfile}`, (err, data) => {
+          if (err) {
+            res.json({
+              output: "",
+              err: "",
+              executionStatus: false,
+              serverError: "ERR: couldn't read the output file",
+            });
+          } else {
+            fs.unlink(outputfile, (err) => {
+              if (err) console.log("couldn't delete output file");
+              res.json({
+                output: data.toString(),
+                err: "",
+                executionStatus: true,
+                serverError: "",
+              });
+            });
+          }
+        });
+      }
     }
-  });
+  );
 };
 
 app.listen(port, (err) => {

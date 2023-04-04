@@ -1,31 +1,57 @@
 #!/bin/bash/
-time=1s
+## This is the main shell file from now
+time=5s
+lang=$1
+filename=$2
+inputfile=$3
+outputfile=$4
+echo $lang
+echo $filename
+echo $inputfile
+echo $outputfile
  #for java programs
-if [ $1 == "java" ]
+if [ $lang == "java" ]
 then
-    javac Java.java  2> output.txt                                #compile
+    javafile=$filename".java";
+    javac $javafile  2> $outputfile                                #compile
     if [ $? = "0" ]; then
-        cat input.txt | timeout $time java Java > output.txt || echo "Time Limit Exceeded" > output.txt   #execute
+        cat $inputfile | timeout $time java $filename > $outputfile 2> $outputfile    #execute
+        if [ $? = "124" ]; then 
+            echo "Time limit exceeded" > $outputfile;
+        fi
     fi
+    rm -f $javafile $filename".class" $inputfile
 #for python programs
-elif [ $1 == "python" ]  
+elif [ $lang == "python" ]  
 then 
-    cat input.txt | timeout $time Python Python.py > output.txt 2> output.txt  #execute
+    pythonfile=$filename".py";
+    cat $inputfile | timeout $time Python $pythonfile > $outputfile 2> $outputfile  #execute
     if [ $? = "124" ]; then 
-        echo "Time limit exceeded" > output.txt;
+        echo "Time limit exceeded" > $outputfile;
     fi
+    rm -f $pythonfile $inputfile
 #for C programs
-elif [ $1 == "c" ] 
+elif [ $lang == "c" ] 
 then 
-    gcc -o C C.c  2> output.txt                                  #compile
+    cfile=$filename".c";
+    gcc -o $filename $cfile  2> $outputfile                                  #compile
     if [ $? = "0" ]; then
-    cat input.txt | timeout $time ./C > output.txt  || echo "Time Limit Exceeded" > output.txt #execute
+    cat $inputfile | timeout $time ./C > $outputfile 2> $outputfile 2> $outputfile    #execute
+        if [ $? = "124" ]; then 
+            echo "Time limit exceeded" > $outputfile;
+        fi
     fi
+    rm -f $cfile $filename."exe" $inputfile
 #for C++ programs
-elif [ $1 == "cpp" ] 
+elif [ $lang == "cpp" ] 
 then 
-    g++ -o Cpp Cpp.cpp  2> output.txt                                 #compile
+    cppfile=$filename".cpp"
+    g++ -o $filename $cppfile  2> $outputfile                                 #compile
     if [ $? = "0" ]; then
-    cat input.txt | timeout $time ./Cpp > output.txt  || echo "Time Limit Exceeded" > output.txt   #execute
+    cat $inputfile | timeout $time ./Cpp > $outputfile 2> $outputfile 2> $outputfile    #execute
+        if [ $? = "124" ]; then 
+            echo "Time limit exceeded" > $outputfile;
+        fi
     fi
+    rm -f $cppfile $filename."exe" $inputfile
 fi
