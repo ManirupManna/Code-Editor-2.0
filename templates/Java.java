@@ -1,4 +1,4 @@
-import java.util.*;
+//Do not change the class name
 public class Java{
     public static void main(String args[])
     {
