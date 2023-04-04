@@ -1,0 +1,68 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:100,300,400);
+
+body {
+  padding: 1.5em;
+  background: rgba(53, 137, 174, 1);
+}
+.main-container {
+  background-color: #f1f1f1;
+  padding: 1.5em 0.2em 2em;
+  border-radius: 3px;
+}
+.option-container {
+  padding: 0px 20px;
+}
+.wrapper {
+  margin-top: 1em;
+  height: 500px;
+  min-height: 500px;
+  position: relative;
+}
+
+#ace-editorid {
+  font-size: 0.9em;
+  font-family: "Courier New", Courier, "Lucida Sans Typewriter",
+    "Lucida Typewriter", monospace;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.input,
+.output {
+  width: 99%;
+  height: 100px;
+  resize: vertical;
+  padding: 0 1em;
+  font-size: 1.05em;
+  border-radius: 5px;
+}
+.output {
+  background-color: black;
+  color: white;
+  height: 200px;
+}
+.textarea-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.instructions {
+  text-align: center;
+  margin: 2px;
+  font-family: sans-serif;
+  font-size: 1.25em;
+}
+
+.button {
+  width: 100px;
+  height: 30px;
+  background-color: aliceblue;
+  padding: 0;
+  display: inline-block;
+  text-align: center;
+}
